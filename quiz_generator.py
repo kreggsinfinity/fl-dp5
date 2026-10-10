@@ -1,7 +1,7 @@
 """
 ENGLISH QUIZ MASTERCLASS PODCAST - 16:9 FULL HD (1920x1080) VIDEO GENERATOR
-Format: 1920x1080 Landscape Studio Broadcast
-Dual Hosts (Emma & Andrew) presenting interactive English quizzes, challenging listeners, and breaking down grammar traps.
+Theme: Broadcast Quiz Stage & Grammar Challenge
+Visuals: Interactive Holographic Quiz Board + Dual Broadcast Mics + 24-Segment Stereo VU Equalizer + Single-Line Highlighted Subtitles
 """
 import os, sys, json, math, subprocess, random, requests, re, asyncio
 from pathlib import Path
@@ -23,15 +23,17 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 VIDEO_WIDTH = 1920
 VIDEO_HEIGHT = 1080
-FPS = 30
+SUBFRAMES_PER_SEC = 2
 
-YELLOW = (255, 215, 0)
+ROYAL_BLUE = (37, 99, 235)
+ELECTRIC_BLUE = (59, 130, 246)
+GOLD_ACCENT = (250, 204, 21)
+CORRECT_GREEN = (16, 185, 129)
 WHITE = (255, 255, 255)
-MUTED_WHITE = (220, 225, 235)
-DARK_BG = (12, 14, 32)
-DARK_BAR = (22, 24, 52)
-CYAN_ACCENT = (6, 182, 212)
-CHANNEL_NAME = "ENGLISH QUIZ MASTERCLASS"
+DARK_BG = (10, 15, 30)
+CARD_BG = (16, 25, 48)
+CARD_BORDER = (45, 65, 110)
+MUTED_TEXT = (160, 180, 210)
 
 EMMA_VOICE = "en-US-AvaNeural"
 ANDREW_VOICE = "en-US-AndrewNeural"
@@ -41,6 +43,8 @@ TOPICS = [
     {
         "topic": "Can You Pass This Present Perfect Grammar Test?",
         "question": "She ________ to Paris three times.",
+        "opt_a": "A) has been  [CORRECT]",
+        "opt_b": "B) was",
         "correct": "has been",
         "keyword": "EXPERIENCE",
         "sub": "PRESENT PERFECT VS SIMPLE PAST"
@@ -48,6 +52,8 @@ TOPICS = [
     {
         "topic": "Gerund or Infinitive? Look Forward To Challenge",
         "question": "I look forward to ________ you tomorrow.",
+        "opt_a": "A) seeing  [CORRECT]",
+        "opt_b": "B) see",
         "correct": "seeing",
         "keyword": "GERUND",
         "sub": "PHRASAL VERB PREPOSITIONS"
@@ -55,6 +61,8 @@ TOPICS = [
     {
         "topic": "Tricky Prepositions: In, On, or At Time Challenge",
         "question": "The concert begins ________ seven PM.",
+        "opt_a": "A) at  [CORRECT]",
+        "opt_b": "B) in",
         "correct": "at",
         "keyword": "PREPOSITION",
         "sub": "TIME AND LOCATION PREPOSITIONS"
@@ -63,12 +71,10 @@ TOPICS = [
 
 def load_font(size, bold=True):
     fonts_to_try = [
-        "C:/Windows/Fonts/arialbd.ttf",
-        "C:/Windows/Fonts/arial.ttf",
-        "C:/Windows/Fonts/segoeuib.ttf",
-        "C:/Windows/Fonts/trebucbd.ttf",
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "C:/Windows/Fonts/arialbd.ttf" if bold else "C:/Windows/Fonts/arial.ttf",
+        "C:/Windows/Fonts/segoeuib.ttf" if bold else "C:/Windows/Fonts/segoeui.ttf",
+        "C:/Windows/Fonts/trebucbd.ttf" if bold else "C:/Windows/Fonts/trebuc.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
     ]
     for p in fonts_to_try:
         if Path(p).exists():
@@ -155,127 +161,200 @@ async def generate_audio_files(turns, run_dir):
         audio_list.append({"path": str(mp3_p), "duration": duration, "speaker": turn["speaker"]})
     return audio_list
 
-def draw_equalizer_waves(draw, start_x, start_y, frame_idx=0):
-    num_bars = 8
-    bar_w = 5
-    gap = 6
-    for i in range(num_bars):
-        h = int(16 + 14 * abs(math.sin(frame_idx * 0.5 + i * 1.2)))
-        x = start_x + i * (bar_w + gap)
-        y_top = start_y - h // 2
-        y_bot = start_y + h // 2
-        draw.rounded_rectangle([(x, y_top), (x + bar_w, y_bot)], radius=2, fill=YELLOW)
+def draw_broadcast_mic(draw, center_x, center_y, is_active, host_label):
+    # Stand plate
+    border_c = GOLD_ACCENT if is_active else (50, 70, 110)
+    draw.ellipse([(center_x - 65, center_y + 110), (center_x + 65, center_y + 130)], fill=(20, 30, 55), outline=border_c, width=3)
+    # Pole
+    draw.rectangle([(center_x - 7, center_y - 10), (center_x + 7, center_y + 115)], fill=(45, 60, 95))
 
-def render_podcast_frame(topic_item, turn, idx, total_turns, elapsed, total_dur, out_path):
-    woman_path = ASSETS_DIR / "woman_base.png"
-    if woman_path.exists():
-        canvas = Image.open(woman_path).convert("RGBA").resize((VIDEO_WIDTH, VIDEO_HEIGHT), Image.Resampling.LANCZOS)
-    else:
-        canvas = Image.new("RGBA", (VIDEO_WIDTH, VIDEO_HEIGHT), DARK_BG)
-        gdraw = ImageDraw.Draw(canvas)
-        for y in range(VIDEO_HEIGHT):
-            shade = int(12 + (y / VIDEO_HEIGHT) * 22)
-            gdraw.line([(0, y), (VIDEO_WIDTH, y)], fill=(shade, shade + 4, shade + 22, 255))
+    # Tally Light Ring
+    tally_c = (239, 68, 68) if is_active else (60, 20, 25)
+    draw.rounded_rectangle([(center_x - 22, center_y - 20), (center_x + 22, center_y - 8)], radius=4, fill=tally_c)
 
+    # Condenser Capsule
+    capsule_c = (25, 40, 75) if not is_active else (40, 65, 120)
+    draw.rounded_rectangle([(center_x - 30, center_y - 95), (center_x + 30, center_y - 20)], radius=16, fill=capsule_c, outline=GOLD_ACCENT if is_active else (60, 85, 130), width=3)
+
+    # Grille lines
+    for gy in range(center_y - 85, center_y - 30, 9):
+        draw.line([(center_x - 22, gy), (center_x + 22, gy)], fill=ELECTRIC_BLUE if is_active else (50, 70, 105), width=2)
+
+    # Host Badge
+    f_p = load_font(22, bold=True)
+    box_c = ROYAL_BLUE if is_active else (20, 30, 55)
+    draw.rounded_rectangle([(center_x - 85, center_y + 145), (center_x + 85, center_y + 180)], radius=8, fill=box_c, outline=GOLD_ACCENT, width=2)
+    tag = f"🎙️ {host_label}" + (" (LIVE)" if is_active else "")
+    draw.text((center_x, center_y + 162), tag, fill=WHITE if is_active else MUTED_TEXT, font=f_p, anchor="mm")
+
+def draw_broadcast_equalizer(draw, center_x, center_y, width, height, sub_idx, is_speaking):
+    num_bars = 24
+    bar_w = 9
+    gap = (width - (num_bars * bar_w)) // (num_bars - 1)
+
+    draw.rounded_rectangle([(center_x - width//2 - 18, center_y - height//2 - 12),
+                            (center_x + width//2 + 18, center_y + height//2 + 12)],
+                           radius=16, fill=(12, 20, 42), outline=ROYAL_BLUE, width=2)
+
+    f_hud = load_font(18, bold=True)
+    draw.text((center_x, center_y - height//2 - 1), "• STUDIO BROADCAST VU EQUALIZER •", fill=ELECTRIC_BLUE, font=f_hud, anchor="mm")
+
+    start_x = center_x - width//2
+    for b in range(num_bars):
+        if is_speaking:
+            phase = sub_idx * 0.9 + b * 0.44
+            wave = abs(math.sin(phase)) * 0.7 + abs(math.cos(phase * 1.5)) * 0.3
+            bar_h = int(12 + wave * (height - 28))
+        else:
+            bar_h = 8
+
+        bx = start_x + b * (bar_w + gap)
+        by = center_y + height//2 - 8 - bar_h
+
+        # Segmented styling (peak turns gold)
+        fill_c = GOLD_ACCENT if (bar_h > height * 0.6) else ELECTRIC_BLUE
+        draw.rounded_rectangle([(bx, by), (bx + bar_w, center_y + height//2 - 8)], radius=3, fill=fill_c)
+
+def render_podcast_subframe(topic_item, turn, turn_idx, sub_idx, total_subframes, elapsed, total_dur, out_path):
+    canvas = Image.new("RGBA", (VIDEO_WIDTH, VIDEO_HEIGHT), DARK_BG)
     draw = ImageDraw.Draw(canvas)
 
-    # 1. Top Left Channel Badge
-    font_tab = load_font(30, bold=True)
-    draw.rounded_rectangle([(60, 40), (620, 110)], radius=18, fill=DARK_BAR, outline=YELLOW, width=3)
-    draw_equalizer_waves(draw, 90, 75, frame_idx=idx)
-    draw.text((190, 75), CHANNEL_NAME, fill=WHITE, font=font_tab, anchor="lm")
+    # Television Studio Backdrop Gradient
+    for y in range(VIDEO_HEIGHT):
+        ratio = y / VIDEO_HEIGHT
+        r = int(10 + ratio * 12)
+        g = int(16 + ratio * 20)
+        b = int(36 + ratio * 32)
+        draw.line([(0, y), (VIDEO_WIDTH, y)], fill=(r, g, b, 255))
 
-    # 2. Top Center Quiz Pill
-    draw.rounded_rectangle([(660, 40), (1480, 110)], radius=18, fill=(24, 34, 68), outline=CYAN_ACCENT, width=2)
-    f_topic = load_font(26, bold=True)
-    draw.text((1070, 75), f"🎯 QUIZ: {topic_item['question']}", fill=CYAN_ACCENT, font=f_topic, anchor="mm")
+    # Ambient Studio Spotlights in top background
+    for sx, sy, sr in [(350, 100, 160), (960, 80, 220), (1570, 100, 160)]:
+        draw.ellipse([(sx - sr, sy - sr), (sx + sr, sy + sr)], fill=(20, 45, 95, 90))
 
-    # 3. Top Right Speaker Badge
-    speaker_name = "EMMA" if turn["speaker"] == "Host1" else "ANDREW"
-    font_spk = load_font(28, bold=True)
-    draw.rounded_rectangle([(1520, 40), (1860, 110)], radius=18, fill=DARK_BAR, outline=YELLOW, width=3)
-    draw.text((1690, 75), f"🎙️ HOST: {speaker_name}", fill=YELLOW, font=font_spk, anchor="mm")
+    # Top Header Deck
+    # Left: Channel badge
+    draw.rounded_rectangle([(60, 36), (560, 106)], radius=16, fill=CARD_BG, outline=ROYAL_BLUE, width=2)
+    f_brand = load_font(28, bold=True)
+    draw.text((310, 71), "🏆 QUIZ MASTERCLASS", fill=WHITE, font=f_brand, anchor="mm")
 
-    # 4. Center Podcast Dialogue Text Display
-    text = turn["text"]
-    parts = re.split(r'(\*\*.*?\*\*)', text)
-    words_list = []
-    for p in parts:
-        if p.startswith('**') and p.endswith('**'):
-            words_list.append((p[2:-2], True))
-        elif p:
-            for w in p.split(' '):
-                if w: words_list.append((w, False))
+    # Center: Challenge Topic
+    draw.rounded_rectangle([(590, 36), (1450, 106)], radius=16, fill=(18, 32, 65), outline=GOLD_ACCENT, width=2)
+    f_scen = load_font(26, bold=True)
+    draw.text((1020, 71), f"⚡ CHALLENGE: {topic_item['sub']}", fill=GOLD_ACCENT, font=f_scen, anchor="mm")
 
-    text_left = 780
-    text_right = 1820
-    max_w = text_right - text_left
-    center_x = (text_left + text_right) // 2
+    # Right: Live Game Show Pill
+    draw.rounded_rectangle([(1480, 36), (1860, 106)], radius=16, fill=(45, 18, 24), outline=(239, 68, 68), width=3)
+    f_air = load_font(26, bold=True)
+    dot_color = (239, 68, 68) if (sub_idx % 2 == 0) else (120, 20, 30)
+    draw.ellipse([(1515, 61), (1535, 81)], fill=dot_color)
+    draw.text((1685, 71), "INTERACTIVE QUIZ", fill=WHITE, font=f_air, anchor="mm")
 
-    font_size = 85
-    lines = None
-    while font_size >= 45:
-        curr_font = load_font(font_size, bold=True)
-        curr_lines = []
-        curr_line = []
-        curr_w = 0
-        for word, is_y in words_list:
-            wb = draw.textbbox((0, 0), word, font=curr_font)
-            wl = wb[2] - wb[0] + 12
-            if curr_w + wl > max_w and curr_line:
-                curr_lines.append((curr_line, curr_w))
-                curr_line = [(word, is_y, wl)]
-                curr_w = wl
+    # Visual Studio Centerpiece: Broadcast Stage with Interactive Quiz Card & VU Equalizer
+    is_emma = (turn["speaker"] == "Host1")
+    is_andrew = not is_emma
+
+    # Left Mic: Emma
+    draw_broadcast_mic(draw, center_x=320, center_y=370, is_active=is_emma, host_label="EMMA")
+
+    # Center Screen: Digital Holographic Quiz Stage Card
+    draw.rounded_rectangle([(520, 160), (1400, 370)], radius=20, fill=(18, 30, 60), outline=ELECTRIC_BLUE, width=3)
+    f_qtitle = load_font(22, bold=True)
+    draw.text((960, 195), "🎯 LISTEN & SOLVE THE CHALLENGE:", fill=MUTED_TEXT, font=f_qtitle, anchor="mm")
+
+    # The actual Quiz Question
+    f_q = load_font(38, bold=True)
+    draw.text((960, 255), f"\"{topic_item['question']}\"", fill=GOLD_ACCENT, font=f_q, anchor="mm")
+
+    # Option Badges: Option A vs Option B
+    draw.rounded_rectangle([(550, 310), (940, 355)], radius=10, fill=(20, 65, 45), outline=CORRECT_GREEN, width=2)
+    f_opt = load_font(22, bold=True)
+    draw.text((745, 332), topic_item.get("opt_a", "A) has been"), fill=WHITE, font=f_opt, anchor="mm")
+
+    draw.rounded_rectangle([(980, 310), (1370, 355)], radius=10, fill=(25, 35, 60), outline=CARD_BORDER, width=2)
+    draw.text((1175, 332), topic_item.get("opt_b", "B) was"), fill=MUTED_TEXT, font=f_opt, anchor="mm")
+
+    # Center Equalizer Deck (Below the Quiz Screen)
+    draw_broadcast_equalizer(draw, center_x=960, center_y=490, width=540, height=130, sub_idx=sub_idx, is_speaking=True)
+
+    # Right Mic: Andrew
+    draw_broadcast_mic(draw, center_x=1600, center_y=370, is_active=is_andrew, host_label="ANDREW")
+
+    # LOWER THIRD: SLEEK SINGLE-LINE SUBTITLE DISPLAY WITH WORD-BY-WORD HIGHLIGHTING
+    draw.rounded_rectangle([(100, 680), (1820, 930)], radius=24, fill=(14, 22, 45, 240), outline=ROYAL_BLUE, width=3)
+
+    # Speaker Tag Pill
+    active_name = "EMMA (Host)" if is_emma else "ANDREW (Host)"
+    draw.rounded_rectangle([(140, 650), (450, 705)], radius=12, fill=ROYAL_BLUE)
+    f_spk = load_font(26, bold=True)
+    draw.text((295, 677), f"🎙️ {active_name}", fill=WHITE, font=f_spk, anchor="mm")
+
+    # Sentence & Spoken Word Highlighting
+    raw_text = turn["text"]
+    words_clean = [re.sub(r'[\*\*\.]', '', w).strip() for w in raw_text.split() if w.strip()]
+    if not words_clean:
+        words_clean = ["Listen", "carefully"]
+
+    active_word_idx = min(len(words_clean) - 1, int((sub_idx / max(1, total_subframes)) * len(words_clean)))
+
+    f_sub = load_font(42, bold=True)
+    rendered_words = raw_text.split()
+
+    line_words = []
+    lines = []
+    max_w = 1600
+    curr_w = 0
+
+    for w_i, w in enumerate(rendered_words):
+        clean_w = re.sub(r'\*\*(.*?)\*\*', r'\1', w)
+        wb = draw.textbbox((0, 0), clean_w + " ", font=f_sub)
+        w_len = wb[2] - wb[0]
+        if curr_w + w_len > max_w and line_words:
+            lines.append(line_words)
+            line_words = [(w_i, w, clean_w, w_len)]
+            curr_w = w_len
+        else:
+            line_words.append((w_i, w, clean_w, w_len))
+            curr_w += w_len
+    if line_words:
+        lines.append(line_words)
+
+    y_start = 740 if len(lines) == 1 else 725
+    line_h = 55
+    for l_idx, line in enumerate(lines[:2]):
+        total_line_w = sum(item[3] for item in line)
+        start_x = 960 - total_line_w // 2
+        curr_x = start_x
+        y_pos = y_start + l_idx * line_h
+
+        for (w_i, raw_w, clean_w, w_len) in line:
+            is_active_word = (w_i == active_word_idx)
+            is_key_word = ("**" in raw_w)
+
+            if is_active_word:
+                # Golden active karaoke pill
+                draw.rounded_rectangle([(curr_x - 4, y_pos - 6), (curr_x + w_len - 2, y_pos + 46)], radius=8, fill=GOLD_ACCENT)
+                draw.text((curr_x, y_pos), clean_w, fill=(10, 16, 32), font=f_sub)
+            elif is_key_word:
+                draw.text((curr_x, y_pos), clean_w, fill=ELECTRIC_BLUE, font=f_sub)
             else:
-                curr_line.append((word, is_y, wl))
-                curr_w += wl
-        if curr_line:
-            curr_lines.append((curr_line, curr_w))
-        if len(curr_lines) <= 3 and all(w <= max_w for _, w in curr_lines):
-            lines = curr_lines
-            main_font = curr_font
-            break
-        font_size -= 5
+                draw.text((curr_x, y_pos), clean_w, fill=WHITE, font=f_sub)
+            curr_x += w_len
 
-    if lines is None:
-        main_font = load_font(45, bold=True)
-        lines = curr_lines
+    # Tip Ribbon inside the Lower Third
+    f_tip = load_font(22, bold=False)
+    draw.text((960, 885), "💡 Quiz Strategy: Notice time expressions (three times, never, already) to choose the right tense!", fill=MUTED_TEXT, font=f_tip, anchor="mm")
 
-    line_h = int(font_size * 1.35)
-    total_h = len(lines) * line_h
-    start_y = 520 - total_h // 2
-
-    shadow_img = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
-    sdraw = ImageDraw.Draw(shadow_img)
-    for l_idx, (line_words, line_w) in enumerate(lines):
-        cx = center_x - line_w // 2
-        cy = start_y + l_idx * line_h
-        for word, _, wl in line_words:
-            sdraw.text((cx + 4, cy + 4), word, fill=(0, 0, 0, 230), font=main_font)
-            cx += wl
-    shadow_img = shadow_img.filter(ImageFilter.GaussianBlur(5))
-    canvas.paste(shadow_img, (0, 0), shadow_img)
-
-    draw = ImageDraw.Draw(canvas)
-    for l_idx, (line_words, line_w) in enumerate(lines):
-        cx = center_x - line_w // 2
-        cy = start_y + l_idx * line_h
-        for word, is_y, wl in line_words:
-            color = YELLOW if is_y else WHITE
-            draw.text((cx, cy), word, fill=color, font=main_font)
-            cx += wl
-
-    # 5. Bottom Progress Bar & Branding
-    draw.line([(0, 1020), (VIDEO_WIDTH, 1020)], fill=(35, 40, 65), width=3)
+    # Bottom Progress Deck
+    draw.line([(0, 1020), (VIDEO_WIDTH, 1020)], fill=(30, 48, 85), width=3)
     ratio = min(1.0, elapsed / max(1.0, total_dur))
-    draw.line([(0, 1020), (int(VIDEO_WIDTH * ratio), 1020)], fill=YELLOW, width=6)
+    draw.line([(0, 1020), (int(VIDEO_WIDTH * ratio), 1020)], fill=GOLD_ACCENT, width=6)
 
-    font_sub = load_font(26, bold=False)
-    draw.text((70, 1050), "Interactive English Quiz • Test Your Grammar • Learn Actively", fill=MUTED_WHITE, font=font_sub, anchor="lm")
+    f_bot = load_font(24, bold=False)
+    draw.text((70, 1050), "English Quiz Masterclass • Grammar In Use • Test Your English", fill=MUTED_TEXT, font=f_bot, anchor="lm")
     time_str = f"{int(elapsed // 60):02d}:{int(elapsed % 60):02d} / {int(total_dur // 60):02d}:{int(total_dur % 60):02d}"
-    draw.text((1850, 1050), time_str, fill=YELLOW, font=font_sub, anchor="rm")
+    draw.text((1850, 1050), time_str, fill=GOLD_ACCENT, font=f_bot, anchor="rm")
 
-    canvas.convert("RGB").save(out_path, quality=92)
+    canvas.convert("RGB").save(out_path, quality=90)
 
 def assemble_video(topic_item, turns, audio_list, run_dir):
     frames_dir = run_dir / "frames"
@@ -288,28 +367,47 @@ def assemble_video(topic_item, turns, audio_list, run_dir):
     clips = []
 
     for i, (turn, audio) in enumerate(zip(turns, audio_list)):
-        img_p = frames_dir / f"frame_{i:03d}.png"
+        dur = audio["duration"]
+        subframes_count = max(8, int(dur * SUBFRAMES_PER_SEC))
+
+        turn_frames_dir = frames_dir / f"turn_{i:03d}"
+        turn_frames_dir.mkdir(parents=True, exist_ok=True)
+
+        for s_idx in range(subframes_count):
+            frame_p = turn_frames_dir / f"frame_{s_idx:04d}.png"
+            sub_elapsed = elapsed + (s_idx / subframes_count) * dur
+            render_podcast_subframe(
+                topic_item, turn, i, s_idx, subframes_count,
+                sub_elapsed, total_dur, str(frame_p)
+            )
+
         clip_p = clips_dir / f"clip_{i:03d}.mp4"
+        input_pattern = str(turn_frames_dir / "frame_%04d.png")
 
-        render_podcast_frame(topic_item, turn, i, len(turns), elapsed, total_dur, str(img_p))
-
-        dur_str = f"{audio['duration']:.3f}"
-        subprocess.run([
-            "ffmpeg", "-y", "-loop", "1", "-i", str(img_p), "-i", audio["path"],
-            "-vf", f"scale={VIDEO_WIDTH}:{VIDEO_HEIGHT},fps={FPS}",
-            "-c:v", "libx264", "-c:a", "aac", "-b:a", "192k",
-            "-pix_fmt", "yuv420p", "-preset", "fast", "-t", dur_str, str(clip_p)
-        ], check=True, capture_output=True)
+        cmd = [
+            "ffmpeg", "-y",
+            "-framerate", str(SUBFRAMES_PER_SEC),
+            "-i", input_pattern,
+            "-i", audio["path"],
+            "-c:v", "libx264",
+            "-pix_fmt", "yuv420p",
+            "-c:a", "aac",
+            "-b:a", "192k",
+            "-shortest",
+            "-preset", "veryfast",
+            str(clip_p)
+        ]
+        subprocess.run(cmd, check=True, capture_output=True)
 
         clips.append(clip_p)
-        elapsed += audio["duration"]
+        elapsed += dur
 
     concat_txt = run_dir / "concat.txt"
     with open(concat_txt, "w") as f:
         for c in clips:
             f.write(f"file '{c.resolve().as_posix()}'\n")
 
-    final_video = run_dir / "interactive_quiz_podcast_final.mp4"
+    final_video = run_dir / "quiz_masterclass_podcast_final.mp4"
     subprocess.run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", str(concat_txt), "-c", "copy", str(final_video)], check=True, capture_output=True)
     return final_video, total_dur
 
@@ -319,14 +417,14 @@ async def run_quiz_generation(topic_idx=0, turns_count=4):
     run_dir = OUTPUT_DIR / f"run_{ts}"
     run_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"[Quiz Podcast] Generating 16:9 Podcast: '{topic_item['topic']}' ({turns_count} turns)...")
+    print(f"[Quiz Podcast] Generating 16:9 Broadcast Stage: '{topic_item['topic']}' ({turns_count} turns)...")
     turns = generate_script_ai(topic_item, target_turns=turns_count)
     audio_list = await generate_audio_files(turns, run_dir)
     video_p, dur = assemble_video(topic_item, turns, audio_list, run_dir)
 
     meta = {
-        "title": f"English Quiz Challenge: {topic_item['question']} 🎯 Slow Podcast Masterclass",
-        "description": f"Test your English level with our interactive podcast challenge! Can you answer '{topic_item['question']}'? Listen to the full explanation with Emma and Andrew! 🌟",
+        "title": f"English Quiz Challenge: {topic_item['topic']} 🎙️ Slow English Podcast",
+        "description": f"Test your grammar with our interactive quiz! Can you solve: '{topic_item['question']}'? Watch and learn with Emma & Andrew! 🏆🎯",
         "question": topic_item["question"],
         "duration_seconds": dur
     }
@@ -335,3 +433,6 @@ async def run_quiz_generation(topic_idx=0, turns_count=4):
 
     print(f"[Quiz Podcast] Video ready: {video_p}")
     return video_p, meta
+
+if __name__ == "__main__":
+    asyncio.run(run_quiz_generation(topic_idx=0, turns_count=2))
