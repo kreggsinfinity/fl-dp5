@@ -1,0 +1,60 @@
+name: Interactive English Quiz Challenge - Automated Video Generator
+
+on:
+  schedule:
+    - cron: '0 10 * * *'
+  workflow_dispatch:
+
+jobs:
+  generate-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-dejavu fonts-freefont-ttf
+          sudo fc-cache -fv
+
+      - name: Install Python Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Generate Video
+        id: generate
+        run: |
+          echo "Generating video for Interactive English Quiz Challenge..."
+          python run_generator.py --auto
+          LATEST_DIR=$(ls -td output/run_*/ | head -1)
+          echo "LATEST_DIR=$LATEST_DIR" >> $GITHUB_OUTPUT
+        env:
+          POLLINATIONS_API_KEY: ${{ secrets.POLLINATIONS_API_KEY }}
+
+      - name: Publish to Facebook Page
+        id: facebook
+        continue-on-error: true
+        run: |
+          LATEST_DIR="${{ steps.generate.outputs.LATEST_DIR }}"
+          VIDEO_FILE=$(find "$LATEST_DIR" -name "*.mp4" | head -1)
+          META_FILE="$LATEST_DIR/metadata.json"
+          if [ -f "$VIDEO_FILE" ]; then
+            python publish_facebook.py "$VIDEO_FILE" "$META_FILE"
+          fi
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
+
+      - name: Upload Video Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: video-eng-05-interactive-quiz-${{ github.run_number }}
+          path: output/run_*
+          retention-days: 7
