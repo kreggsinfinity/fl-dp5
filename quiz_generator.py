@@ -88,6 +88,67 @@ TOPICS = [
     }
 ]
 
+
+def configure_edge_tts():
+    """Ensure edge_tts connects to Microsoft's active Cognitive Services endpoint to avoid 403 Forbidden."""
+    try:
+        import edge_tts.constants
+        import edge_tts.communicate
+        token = getattr(edge_tts.constants, "TRUSTED_CLIENT_TOKEN", "6A5AA1D4EAFF4E9FB37E23D68491D6F4")
+        new_url = (
+            "wss://api.msedgeservices.com/tts/cognitiveservices/websocket/v1"
+            f"?Ocp-Apim-Subscription-Key={token}"
+        )
+        edge_tts.constants.WSS_URL = new_url
+        edge_tts.communicate.WSS_URL = new_url
+    except Exception as e:
+        print(f"[edge_tts] configure warning: {e}")
+
+async def synthesize_turn_speech(spoken, voice, rate, pitch=None, max_retries=3):
+    """Synthesizes speech with active endpoint, 3x self-healing retries, and gTTS fallback."""
+    configure_edge_tts()
+    for attempt in range(max_retries):
+        try:
+            kwargs = {"rate": rate}
+            if pitch:
+                kwargs["pitch"] = pitch
+            comm = edge_tts.Communicate(spoken, voice, **kwargs)
+            sentences = []
+            audio_bytes = bytearray()
+            async for chunk in comm.stream():
+                if chunk.get("type") == "SentenceBoundary":
+                    start_s = chunk["offset"] / 10_000_000.0
+                    dur_s = chunk["duration"] / 10_000_000.0
+                    sentences.append({
+                        "text": chunk["text"],
+                        "start": start_s,
+                        "duration": dur_s,
+                        "end": start_s + dur_s
+                    })
+                elif chunk.get("type") == "audio":
+                    audio_bytes.extend(chunk["data"])
+            
+            if len(audio_bytes) > 500:
+                return audio_bytes, sentences
+            else:
+                print(f"    [TTS] Attempt {attempt+1}: bytes too small ({len(audio_bytes)}), retrying...")
+        except Exception as e:
+            print(f"    [TTS] Attempt {attempt+1} error: {e}")
+        await asyncio.sleep(2 * (attempt + 1))
+    
+    # Fallback to gTTS if Edge TTS drops out
+    try:
+        from gtts import gTTS
+        import io
+        print(f"    [TTS] Active endpoint exhausted. Using gTTS fallback...")
+        tts = gTTS(text=spoken, lang="en")
+        buf = io.BytesIO()
+        tts.write_to_fp(buf)
+        return bytearray(buf.getvalue()), []
+    except Exception as fb_err:
+        print(f"    [TTS] Fallback error: {fb_err}")
+        return None, []
+
 def load_font(size, bold=True):
     fonts_to_try = [
         "C:/Windows/Fonts/arialbd.ttf" if bold else "C:/Windows/Fonts/arial.ttf",
