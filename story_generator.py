@@ -124,12 +124,12 @@ def generate_dynamic_topic_ai(past_topics: list, ep_num: int = 1) -> dict:
                 if raw.startswith("```"):
                     raw = re.sub(r"^```(?:json)?\s*", "", raw)
                     raw = re.sub(r"\s*```$", "", raw)
-                data = json.loads(raw)
-                if data.get("topic") and data.get("acts") and len(data["acts"]) >= 4:
-                    t_lower = data["topic"].lower().strip()
+                topic_val = data.get("topic", "")
+                if topic_val and data.get("acts") and len(data["acts"]) >= 4:
+                    t_lower = topic_val.lower().strip()
                     past_lowers = [p.lower().strip() for p in past_topics]
                     if t_lower not in past_lowers:
-                        print(f"[StoryGenerator] Dynamically generated new topic: '{data["topic"]}'")
+                        print(f"[StoryGenerator] Dynamically generated new topic: '{topic_val}'")
                         return data
         except Exception as e:
             print(f"[StoryGenerator] Dynamic topic attempt {attempt+1} error: {e}")
