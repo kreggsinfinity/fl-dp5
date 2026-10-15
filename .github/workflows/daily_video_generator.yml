@@ -1,21 +1,49 @@
-name: Interactive English Quiz Challenge - Automated Video Generator
+name: Daily Video Generator
 
 on:
   schedule:
-    - cron: '0 10 * * *'
+    - cron: '0 2 * * *'
   workflow_dispatch:
+    inputs:
+      duration:
+        description: 'Target duration in minutes (default: 20)'
+        required: false
+        default: '20'
+      preview:
+        description: 'Preview seconds only (leave empty for full video)'
+        required: false
+        default: ''
+      dry_run:
+        description: 'Dry run without publishing'
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: write
 
 jobs:
   generate-and-publish:
     runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    env:
+      FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+      FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
+      POLLINATIONS_API_KEY: ${{ secrets.POLLINATIONS_API_KEY }}
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip'
 
       - name: Install System Dependencies
         run: |
@@ -28,33 +56,29 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Generate Video
-        id: generate
+      - name: Run Pipeline
         run: |
-          echo "Generating video for Interactive English Quiz Challenge..."
-          python run_generator.py --auto
-          LATEST_DIR=$(ls -td output/run_*/ | head -1)
-          echo "LATEST_DIR=$LATEST_DIR" >> $GITHUB_OUTPUT
-        env:
-          POLLINATIONS_API_KEY: ${{ secrets.POLLINATIONS_API_KEY }}
-
-      - name: Publish to Facebook Page
-        id: facebook
-        continue-on-error: true
-        run: |
-          LATEST_DIR="${{ steps.generate.outputs.LATEST_DIR }}"
-          VIDEO_FILE=$(find "$LATEST_DIR" -name "*.mp4" | head -1)
-          META_FILE="$LATEST_DIR/metadata.json"
-          if [ -f "$VIDEO_FILE" ]; then
-            python publish_facebook.py "$VIDEO_FILE" "$META_FILE"
+          DURATION="${{ github.event.inputs.duration || '20' }}"
+          PREVIEW_FLAG=""
+          if [ -n "${{ github.event.inputs.preview }}" ]; then
+            PREVIEW_FLAG="--preview ${{ github.event.inputs.preview }}"
           fi
-        env:
-          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
-          FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
+          DRY_RUN_FLAG=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            DRY_RUN_FLAG="--dry-run"
+          fi
+          python auto_pipeline.py --duration "$DURATION" $PREVIEW_FLAG $DRY_RUN_FLAG
 
-      - name: Upload Video Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: video-eng-05-interactive-quiz-${{ github.run_number }}
-          path: output/run_*
-          retention-days: 7
+      - name: Commit published videos log
+        if: always()
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add published_videos.json
+          if git diff --staged --quiet; then
+            echo "No changes to published_videos.json"
+          else
+            git commit -m "chore: update published videos log [skip ci]"
+            git pull --rebase origin main || git pull --rebase origin master || true
+            git push origin main || git push origin master
+          fi
