@@ -124,6 +124,7 @@ def generate_dynamic_topic_ai(past_topics: list, ep_num: int = 1) -> dict:
                 if raw.startswith("```"):
                     raw = re.sub(r"^```(?:json)?\s*", "", raw)
                     raw = re.sub(r"\s*```$", "", raw)
+                data = json.loads(raw)
                 topic_val = data.get("topic", "")
                 if topic_val and data.get("acts") and len(data["acts"]) >= 4:
                     t_lower = topic_val.lower().strip()
