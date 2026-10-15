@@ -146,9 +146,9 @@ async def generate_podcast_audio(dialogue: list) -> tuple:
             res["speaker"] = spk
             res["name"] = turn.get("name", "Host")
             res["turn_text"] = text
-            if (idx + 1) % 20 == 0 or idx == len(dialogue) - 1:
+            if (idx + 1) % 25 == 0 or idx == len(dialogue) - 1:
                 print(f"  [TTS Progress] Synthesized {idx + 1}/{len(dialogue)} turns")
-            await asyncio.sleep(0.6)  # Inter-turn rate-limit buffer
+            await asyncio.sleep(0.5)  # Inter-turn rate-limit buffer
             return idx, res
 
     tasks = [worker(i, t) for i, t in enumerate(dialogue)]

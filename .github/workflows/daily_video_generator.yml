@@ -69,16 +69,16 @@ jobs:
           fi
           python auto_pipeline.py --duration "$DURATION" $PREVIEW_FLAG $DRY_RUN_FLAG
 
-      - name: Commit published videos log
+      - name: Commit published videos & history log
         if: always()
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add published_videos.json
+          git add published_videos.json history.json history.js
           if git diff --staged --quiet; then
-            echo "No changes to published_videos.json"
+            echo "No changes to history files"
           else
-            git commit -m "chore: update published videos log [skip ci]"
+            git commit -m "chore: update published videos and history log [skip ci]"
             git pull --rebase origin main || git pull --rebase origin master || true
             git push origin main || git push origin master
           fi

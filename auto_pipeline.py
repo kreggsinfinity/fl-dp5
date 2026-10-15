@@ -7,29 +7,56 @@ if sys.platform == 'win32':
     except Exception: pass
 
 import config
-from story_generator import generate_full_podcast_story, generate_metadata
+from story_generator import generate_full_podcast_story, generate_metadata, load_history_topics
 from tts_engine import generate_podcast_audio
 from thumbnail_generator import generate_thumbnail
 from video_composer import render_podcast_video
 from publish_facebook import upload_to_facebook
 
-def run_auto_pipeline(target_minutes: float = 20.0, topic: str = None, dry_run: bool = False, preview_seconds: float = None):
-    print("=" * 70)
-    print(f"    [PODCAST] {config.CHANNEL_NAME} - AUTOMATED PIPELINE")
-    print("=" * 70)
-
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    history_file = os.path.join(config.BASE_DIR, "published_videos.json")
+def save_episode_history(record: dict):
+    """Synchronously saves episode history to published_videos.json, history.json, and history.js."""
+    base_dir = config.BASE_DIR
+    p1 = os.path.join(base_dir, "published_videos.json")
     history = []
-    if os.path.exists(history_file):
+    if os.path.exists(p1):
         try:
-            with open(history_file, "r", encoding="utf-8") as f:
+            with open(p1, "r", encoding="utf-8") as f:
                 history = json.load(f)
         except Exception:
             history = []
-    ep_num = len(history) + 1
 
-    # Step 1: Story & Acts
+    history.append(record)
+
+    # 1. published_videos.json
+    with open(p1, "w", encoding="utf-8") as f:
+        json.dump(history, f, indent=2, ensure_ascii=False)
+
+    # 2. history.json
+    p2 = os.path.join(base_dir, "history.json")
+    with open(p2, "w", encoding="utf-8") as f:
+        json.dump(history, f, indent=2, ensure_ascii=False)
+
+    # 3. history.js
+    p3 = os.path.join(base_dir, "history.js")
+    with open(p3, "w", encoding="utf-8") as f:
+        f.write("// Daily Video History Log & Topic Registry\n")
+        f.write("const PODCAST_HISTORY = " + json.dumps(history, indent=2, ensure_ascii=False) + ";\n")
+        f.write("if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }\n")
+        f.write("if (typeof window !== 'undefined') { window.PODCAST_HISTORY = PODCAST_HISTORY; }\n")
+
+    print(f"[History] Recorded episode #{record['episode']} to published_videos.json, history.json, and history.js")
+
+def run_auto_pipeline(target_minutes: float = 20.0, topic: str = None, dry_run: bool = False, preview_seconds: float = None):
+    print("=" * 70)
+    print(f"    [PODCAST] {config.CHANNEL_NAME} - AUTOMATED PIPELINE")
+    print(f"    Target Duration: {target_minutes:.1f} minutes")
+    print("=" * 70)
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    past_topics = load_history_topics()
+    ep_num = len(past_topics) + 1
+
+    # Step 1: Story & Acts (20 mins, dynamic non-repeating topic)
     print(f"\n[Step 1/5] Generating Podcast Story (Target: {target_minutes:.1f} mins)...")
     story = generate_full_podcast_story(target_minutes=target_minutes, topic=topic, ep_num=ep_num)
 
@@ -82,20 +109,20 @@ def run_auto_pipeline(target_minutes: float = 20.0, topic: str = None, dry_run: 
         except Exception as e:
             print(f"[Facebook Upload Error] {e}")
 
-    # Append to history
-    history.append({
+    # Append to all history registries
+    record = {
         "episode": ep_num,
         "topic": story["topic"],
         "date": datetime.now().isoformat(),
-        "duration_sec": total_dur,
-        "video_file": os.path.basename(video_path)
-    })
-    with open(history_file, "w", encoding="utf-8") as f:
-        json.dump(history, f, indent=2, ensure_ascii=False)
-    print(f"[History] Recorded episode #{ep_num} in published_videos.json")
+        "duration_sec": round(total_dur, 2),
+        "duration_min": round(total_dur / 60.0, 2),
+        "video_file": os.path.basename(video_path),
+        "platform": "Facebook"
+    }
+    save_episode_history(record)
 
     print("\n" + "=" * 70)
-    print("                 PIPELINE RUN COMPLETE!")
+    print(f"       PIPELINE RUN COMPLETE! Ep. #{ep_num} ({total_dur/60:.1f} mins)")
     print("=" * 70)
     return video_path
 
