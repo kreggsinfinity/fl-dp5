@@ -87,7 +87,7 @@ async def synthesize_turn(text: str, voice: str, pitch: str, rate: str, turn_ind
         seg.export(temp_turn_path, format="mp3")
         return {"audio_segment": seg, "duration": est_dur, "words": [], "turn_index": turn_index}
 
-def chunk_turn_words(words: list, speaker: str, global_turn_offset: float, turn_duration: float, max_words_per_line: int = 6) -> list:
+def chunk_turn_words(words: list, speaker: str, global_turn_offset: float, turn_duration: float, max_words_per_line: int = 4) -> list:
     if not words:
         return []
 
@@ -134,7 +134,10 @@ async def generate_podcast_audio(dialogue: list) -> tuple:
     async def worker(idx: int, turn: dict):
         async with semaphore:
             spk = turn.get("speaker", "female").lower()
-            if "female" in spk or turn.get("name") == config.HOST1_NAME:
+            if config.IS_SOLO:
+                voice = config.VOICE_HOST1
+                pitch = config.HOST1_PITCH
+            elif "female" in spk or turn.get("name") == config.HOST1_NAME:
                 voice = config.VOICE_HOST1
                 pitch = config.HOST1_PITCH
             else:
@@ -148,7 +151,7 @@ async def generate_podcast_audio(dialogue: list) -> tuple:
             res["turn_text"] = text
             if (idx + 1) % 25 == 0 or idx == len(dialogue) - 1:
                 print(f"  [TTS Progress] Synthesized {idx + 1}/{len(dialogue)} turns")
-            await asyncio.sleep(0.5)  # Inter-turn rate-limit buffer
+            await asyncio.sleep(0.4)  # Inter-turn rate-limit buffer
             return idx, res
 
     tasks = [worker(i, t) for i, t in enumerate(dialogue)]

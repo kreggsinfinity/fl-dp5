@@ -95,16 +95,25 @@ def render_podcast_video(image_path: str, audio_path: str, subtitle_chunks: list
         ratio = min(1.0, t_sec / max(1.0, total_audio_sec))
         draw.line([(0, 1025), (int(config.VIDEO_WIDTH * ratio), 1025)], fill=(255, 215, 0), width=4)
 
-        # Draw subtitle
+        # Draw subtitle with STRICT edge clamping [60, 1860]
         if chunk:
-            sx = config.SUBTITLE_CENTER_X - (chunk["total_w"] // 2)
+            pill_pad = 35
+            safe_min_x = 60 + pill_pad
+            safe_max_x = (config.VIDEO_WIDTH - 60) - pill_pad - chunk["total_w"]
+            ideal_sx = config.SUBTITLE_CENTER_X - (chunk["total_w"] // 2)
+
+            if safe_max_x >= safe_min_x:
+                sx = max(safe_min_x, min(ideal_sx, safe_max_x))
+            else:
+                sx = safe_min_x
+
             sy = config.SUBTITLE_Y
 
-            # Glow
+            # Glow & pill background
             draw.rounded_rectangle([
-                (sx - 35, sy - 15),
-                (sx + chunk["total_w"] + 35, sy + config.SUBTITLE_FONT_SIZE + 25)
-            ], radius=20, fill=(12, 14, 22, 190), outline=(255, 215, 0, 120), width=1)
+                (sx - pill_pad, sy - 15),
+                (sx + chunk["total_w"] + pill_pad, sy + config.SUBTITLE_FONT_SIZE + 25)
+            ], radius=20, fill=(12, 14, 22, 195), outline=(255, 215, 0, 130), width=1)
 
             curr_x = sx
             for wm in chunk["words"]:
