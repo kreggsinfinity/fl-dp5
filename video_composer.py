@@ -92,18 +92,123 @@ def render_podcast_video(image_path: str, audio_path: str, subtitle_chunks: list
     pipe = subprocess.Popen(ffmpeg_cmd, stdin=subprocess.PIPE, stderr=subprocess.DEVNULL)
     total_audio_sec = total_frames / float(fps)
 
-    # Pre-render subtitle chunks
-    space_w = draw_base.textbbox((0, 0), " ", font=sub_font)[2]
+    # Pre-render & layout subtitle chunks (Bulletproof Auto-Wrap & Auto-Scale)
+    pill_pad = 32
+    if getattr(config, "IS_SOLO", False):
+        safe_left = 980
+        safe_right = 1780
+    else:
+        # Dual hosts: Left host face is X<500, Right host face is X>1450.
+        # Safe center zone strictly [620, 1300] ensures >170px clearance from both faces.
+        safe_left = 620
+        safe_right = 1300
+
+    max_container_w = safe_right - safe_left
+    max_text_w = max_container_w - pill_pad * 2
+    base_font_size = config.SUBTITLE_FONT_SIZE
     processed_chunks = []
+
     for c in subtitle_chunks:
         words = c["words"]
         if not words:
             continue
-        w_metrics = [{"word": w["word"], "start": w["start"], "end": w["end"], "width": draw_base.textbbox((0, 0), w["word"], font=sub_font)[2]} for w in words]
+
+        c_font = sub_font
+        space_w = draw_base.textbbox((0, 0), " ", font=c_font)[2]
+        w_metrics = [{"word": w["word"], "start": w["start"], "end": w["end"], "width": draw_base.textbbox((0, 0), w["word"], font=c_font)[2]} for w in words]
         total_w = sum(wm["width"] for wm in w_metrics) + max(0, len(w_metrics) - 1) * space_w
+
+        # Case 1: Fits comfortably on 1 line
+        if total_w <= max_text_w:
+            pill_w = total_w + pill_pad * 2
+            ideal_left = config.SUBTITLE_CENTER_X - (pill_w // 2)
+            pill_left = max(safe_left, min(ideal_left, safe_right - pill_w))
+            pill_right = pill_left + pill_w
+            pill_top = config.SUBTITLE_Y - 14
+            pill_bot = config.SUBTITLE_Y + base_font_size + 22
+            lines = [{
+                "words": w_metrics,
+                "line_w": total_w,
+                "sx": pill_left + pill_pad,
+                "sy": config.SUBTITLE_Y
+            }]
+        # Case 2: Multi-word chunk exceeds max_text_w -> Split into 2 balanced lines
+        elif len(words) > 1:
+            best_split = len(words) // 2
+            min_max_w = float("inf")
+            best_lines = None
+            for split in range(1, len(words)):
+                l1 = w_metrics[:split]
+                l2 = w_metrics[split:]
+                w1 = sum(wm["width"] for wm in l1) + max(0, len(l1) - 1) * space_w
+                w2 = sum(wm["width"] for wm in l2) + max(0, len(l2) - 1) * space_w
+                if max(w1, w2) < min_max_w:
+                    min_max_w = max(w1, w2)
+                    best_lines = (l1, w1, l2, w2)
+            l1, w1, l2, w2 = best_lines
+
+            # If both lines fit:
+            if max(w1, w2) <= max_text_w:
+                pill_w = max(w1, w2) + pill_pad * 2
+                ideal_left = config.SUBTITLE_CENTER_X - (pill_w // 2)
+                pill_left = max(safe_left, min(ideal_left, safe_right - pill_w))
+                pill_right = pill_left + pill_w
+                line_h = base_font_size + 10
+                pill_top = config.SUBTITLE_Y - 20
+                pill_bot = pill_top + line_h * 2 + 25
+                lines = [
+                    {"words": l1, "line_w": w1, "sx": config.SUBTITLE_CENTER_X - (w1 // 2), "sy": pill_top + 12},
+                    {"words": l2, "line_w": w2, "sx": config.SUBTITLE_CENTER_X - (w2 // 2), "sy": pill_top + 12 + line_h}
+                ]
+            else:
+                scale = (max_text_w - 10) / float(max(w1, w2))
+                scaled_size = max(28, int(base_font_size * scale))
+                c_font = ImageFont.truetype(font_path, scaled_size)
+                space_w = draw_base.textbbox((0, 0), " ", font=c_font)[2]
+                l1_sc = [{"word": w["word"], "start": w["start"], "end": w["end"], "width": draw_base.textbbox((0, 0), w["word"], font=c_font)[2]} for w in words[:len(l1)]]
+                l2_sc = [{"word": w["word"], "start": w["start"], "end": w["end"], "width": draw_base.textbbox((0, 0), w["word"], font=c_font)[2]} for w in words[len(l1):]]
+                w1_sc = sum(wm["width"] for wm in l1_sc) + max(0, len(l1_sc) - 1) * space_w
+                w2_sc = sum(wm["width"] for wm in l2_sc) + max(0, len(l2_sc) - 1) * space_w
+                pill_w = max(w1_sc, w2_sc) + pill_pad * 2
+                ideal_left = config.SUBTITLE_CENTER_X - (pill_w // 2)
+                pill_left = max(safe_left, min(ideal_left, safe_right - pill_w))
+                pill_right = pill_left + pill_w
+                line_h = scaled_size + 10
+                pill_top = config.SUBTITLE_Y - 20
+                pill_bot = pill_top + line_h * 2 + 25
+                lines = [
+                    {"words": l1_sc, "line_w": w1_sc, "sx": config.SUBTITLE_CENTER_X - (w1_sc // 2), "sy": pill_top + 12},
+                    {"words": l2_sc, "line_w": w2_sc, "sx": config.SUBTITLE_CENTER_X - (w2_sc // 2), "sy": pill_top + 12 + line_h}
+                ]
+        # Case 3: Single gigantic word exceeds max_text_w -> Auto-scale font
+        else:
+            scale = (max_text_w - 10) / float(total_w)
+            scaled_size = max(28, int(base_font_size * scale))
+            c_font = ImageFont.truetype(font_path, scaled_size)
+            space_w = draw_base.textbbox((0, 0), " ", font=c_font)[2]
+            sc_metrics = [{"word": w["word"], "start": w["start"], "end": w["end"], "width": draw_base.textbbox((0, 0), w["word"], font=c_font)[2]} for w in words]
+            sc_total_w = sum(wm["width"] for wm in sc_metrics) + max(0, len(sc_metrics) - 1) * space_w
+            pill_w = sc_total_w + pill_pad * 2
+            ideal_left = config.SUBTITLE_CENTER_X - (pill_w // 2)
+            pill_left = max(safe_left, min(ideal_left, safe_right - pill_w))
+            pill_right = pill_left + pill_w
+            pill_top = config.SUBTITLE_Y - 14
+            pill_bot = config.SUBTITLE_Y + scaled_size + 22
+            lines = [{
+                "words": sc_metrics,
+                "line_w": sc_total_w,
+                "sx": pill_left + pill_pad,
+                "sy": config.SUBTITLE_Y
+            }]
+
         processed_chunks.append({
-            "start": c["start"], "end": c["end"], "total_w": total_w,
-            "speaker": c.get("speaker", "female"), "words": w_metrics
+            "start": c["start"],
+            "end": c["end"],
+            "speaker": c.get("speaker", "female"),
+            "font": c_font,
+            "space_w": space_w,
+            "pill_box": (pill_left, pill_top, pill_right, pill_bot),
+            "lines": lines
         })
 
     active_chunk_idx = 0
@@ -126,44 +231,29 @@ def render_podcast_video(image_path: str, audio_path: str, subtitle_chunks: list
         ratio = min(1.0, t_sec / max(1.0, total_audio_sec))
         draw.line([(0, 1025), (int(config.VIDEO_WIDTH * ratio), 1025)], fill=(255, 215, 0), width=4)
 
-        # Draw subtitle strictly between hosts (or right zone for solo)
+        # Draw subtitle strictly inside pill container
         if chunk:
-            pill_pad = 32
-            total_pill_w = chunk["total_w"] + pill_pad * 2
+            p_left, p_top, p_right, p_bot = chunk["pill_box"]
+            draw.rounded_rectangle(
+                [(p_left, p_top), (p_right, p_bot)],
+                radius=20,
+                fill=(12, 14, 22, 215),
+                outline=(255, 215, 0, 180),
+                width=2
+            )
 
-            if getattr(config, "IS_SOLO", False):
-                safe_left = 980
-                safe_right = 1780
-            else:
-                # Dual hosts: Left host face is X<500, Right host face is X>1450.
-                # Safe center zone strictly [620, 1300] ensures >170px clearance from both faces.
-                safe_left = 620
-                safe_right = 1300
-
-            max_allowed_w = safe_right - safe_left
-            effective_pill_w = min(total_pill_w, max_allowed_w)
-
-            ideal_left = config.SUBTITLE_CENTER_X - (effective_pill_w // 2)
-            pill_left = max(safe_left, min(ideal_left, safe_right - effective_pill_w))
-            pill_right = pill_left + effective_pill_w
-
-            sx = pill_left + pill_pad
-            sy = config.SUBTITLE_Y
-
-            # Glow & pill background
-            draw.rounded_rectangle([
-                (pill_left, sy - 14),
-                (pill_right, sy + config.SUBTITLE_FONT_SIZE + 22)
-            ], radius=20, fill=(12, 14, 22, 215), outline=(255, 215, 0, 180), width=2)
-
-            curr_x = sx
-            for wm in chunk["words"]:
-                is_active = (wm["start"] <= t_sec <= wm["end"])
-                color = (255, 215, 0) if is_active else (255, 255, 255)
-                # Drop shadow
-                draw.text((curr_x + 3, sy + 3), wm["word"], fill=(0, 0, 0, 220), font=sub_font)
-                draw.text((curr_x, sy), wm["word"], fill=color, font=sub_font)
-                curr_x += wm["width"] + space_w
+            c_font = chunk["font"]
+            space_w = chunk["space_w"]
+            for line_data in chunk["lines"]:
+                curr_x = line_data["sx"]
+                sy = line_data["sy"]
+                for wm in line_data["words"]:
+                    is_active = (wm["start"] <= t_sec <= wm["end"])
+                    color = (255, 215, 0) if is_active else (255, 255, 255)
+                    # Drop shadow
+                    draw.text((curr_x + 3, sy + 3), wm["word"], fill=(0, 0, 0, 220), font=c_font)
+                    draw.text((curr_x, sy), wm["word"], fill=color, font=c_font)
+                    curr_x += wm["width"] + space_w
 
         raw_bgr = np.array(frame_img.convert("RGB"))[:, :, ::-1].tobytes()
         pipe.stdin.write(raw_bgr)
