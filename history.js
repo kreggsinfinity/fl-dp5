@@ -8,6 +8,15 @@ const PODCAST_HISTORY = [
     "duration_min": 22.07,
     "video_file": "podcast_ep1_20261015_182743.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 2,
+    "topic": "The Art of Persuasion: Unpacking Rhetoric and Influence in Everyday Discourse",
+    "date": "2026-10-16T18:38:02.230482",
+    "duration_sec": 1390.2,
+    "duration_min": 23.17,
+    "video_file": "podcast_ep2_20261016_181441.mp4",
+    "platform": "Facebook"
   }
 ];
 if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }
