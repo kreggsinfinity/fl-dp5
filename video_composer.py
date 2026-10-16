@@ -21,19 +21,50 @@ def render_podcast_video(image_path: str, audio_path: str, subtitle_chunks: list
     sub_font = ImageFont.truetype(font_path, config.SUBTITLE_FONT_SIZE)
     f_brand = ImageFont.truetype(font_path, 28)
 
-    # Paste channel logo badge if exists
+    # 1. Circular Channel Logo Badge with Antialiased Mask & Gold Rim
+    logo_size = 104
+    logo_x, logo_y = 50, 35
     if os.path.exists(config.LOGO_PATH):
         try:
-            logo = Image.open(config.LOGO_PATH).convert("RGBA")
-            logo = logo.resize((100, 100), Image.Resampling.LANCZOS)
-            base_img.paste(logo, (50, 40), logo)
+            raw_logo = Image.open(config.LOGO_PATH).convert("RGBA")
+            raw_logo = raw_logo.resize((logo_size, logo_size), Image.Resampling.LANCZOS)
+
+            mask = Image.new("L", (logo_size * 4, logo_size * 4), 0)
+            m_draw = ImageDraw.Draw(mask)
+            m_draw.ellipse((0, 0, logo_size * 4, logo_size * 4), fill=255)
+            mask = mask.resize((logo_size, logo_size), Image.Resampling.LANCZOS)
+
+            circular_logo = Image.new("RGBA", (logo_size, logo_size), (0, 0, 0, 0))
+            circular_logo.paste(raw_logo, (0, 0), mask)
+            base_img.paste(circular_logo, (logo_x, logo_y), circular_logo)
+
+            draw_base.ellipse(
+                [(logo_x - 2, logo_y - 2), (logo_x + logo_size + 2, logo_y + logo_size + 2)],
+                outline=(255, 215, 0, 240),
+                width=3
+            )
         except Exception:
             pass
 
-    # Top Pill Branding
-    draw_base.rounded_rectangle([(165, 55), (165 + 440, 115)], radius=28, fill=(16, 20, 32, 220), outline=(255, 215, 0, 200), width=2)
-    draw_base.ellipse([(185, 75), (205, 95)], fill=(34, 197, 94))
-    draw_base.text((220, 70), config.CHANNEL_NAME, fill=(255, 255, 255), font=f_brand)
+    # 2. Dynamic Auto-Wrapping Top Branding Pill
+    bbox = draw_base.textbbox((0, 0), config.CHANNEL_NAME, font=f_brand)
+    text_w = bbox[2] - bbox[0]
+    pill_start_x = 168
+    text_start_x = pill_start_x + 48
+    pill_end_x = text_start_x + text_w + 32
+
+    draw_base.rounded_rectangle(
+        [(pill_start_x, 50), (pill_end_x, 112)],
+        radius=30,
+        fill=(16, 20, 32, 230),
+        outline=(255, 215, 0, 220),
+        width=2
+    )
+    # Glowing green live indicator
+    dot_cx = pill_start_x + 24
+    draw_base.ellipse([(dot_cx - 8, 81 - 8), (dot_cx + 8, 81 + 8)], fill=(34, 197, 94))
+    # Channel name text perfectly inside container
+    draw_base.text((text_start_x, 66), config.CHANNEL_NAME, fill=(255, 255, 255), font=f_brand)
 
     # Footer
     draw_base.line([(0, 1025), (config.VIDEO_WIDTH, 1025)], fill=(45, 50, 70), width=2)
