@@ -87,15 +87,21 @@ async def synthesize_turn(text: str, voice: str, pitch: str, rate: str, turn_ind
         seg.export(temp_turn_path, format="mp3")
         return {"audio_segment": seg, "duration": est_dur, "words": [], "turn_index": turn_index}
 
-def chunk_turn_words(words: list, speaker: str, global_turn_offset: float, turn_duration: float, max_words_per_line: int = 4) -> list:
+def chunk_turn_words(words: list, speaker: str, global_turn_offset: float, turn_duration: float, max_words_per_line: int = None, max_chars_per_line: int = None) -> list:
     if not words:
         return []
+
+    if max_words_per_line is None:
+        max_words_per_line = getattr(config, "MAX_WORDS_PER_LINE", 3)
+    if max_chars_per_line is None:
+        max_chars_per_line = getattr(config, "MAX_CHARS_PER_LINE", 22)
 
     chunks = []
     curr = []
     for w in words:
         curr.append(w)
-        if len(curr) >= max_words_per_line or w["word"].endswith(('.', '?', '!', ';')):
+        line_chars = sum(len(x["word"]) for x in curr) + len(curr) - 1
+        if len(curr) >= max_words_per_line or line_chars >= max_chars_per_line or w["word"].endswith(('.', '?', '!', ';', ':', ',')):
             chunks.append(curr)
             curr = []
     if curr:
@@ -171,7 +177,8 @@ async def generate_podcast_audio(dialogue: list) -> tuple:
             speaker=speaker,
             global_turn_offset=current_offset,
             turn_duration=turn_res["duration"],
-            max_words_per_line=config.MAX_WORDS_PER_LINE
+            max_words_per_line=config.MAX_WORDS_PER_LINE,
+            max_chars_per_line=getattr(config, "MAX_CHARS_PER_LINE", 22)
         )
         for c in turn_chunks:
             c["turn_idx"] = idx

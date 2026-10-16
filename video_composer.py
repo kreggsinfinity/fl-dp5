@@ -126,25 +126,35 @@ def render_podcast_video(image_path: str, audio_path: str, subtitle_chunks: list
         ratio = min(1.0, t_sec / max(1.0, total_audio_sec))
         draw.line([(0, 1025), (int(config.VIDEO_WIDTH * ratio), 1025)], fill=(255, 215, 0), width=4)
 
-        # Draw subtitle with STRICT edge clamping [60, 1860]
+        # Draw subtitle strictly between hosts (or right zone for solo)
         if chunk:
-            pill_pad = 35
-            safe_min_x = 60 + pill_pad
-            safe_max_x = (config.VIDEO_WIDTH - 60) - pill_pad - chunk["total_w"]
-            ideal_sx = config.SUBTITLE_CENTER_X - (chunk["total_w"] // 2)
+            pill_pad = 32
+            total_pill_w = chunk["total_w"] + pill_pad * 2
 
-            if safe_max_x >= safe_min_x:
-                sx = max(safe_min_x, min(ideal_sx, safe_max_x))
+            if getattr(config, "IS_SOLO", False):
+                safe_left = 980
+                safe_right = 1780
             else:
-                sx = safe_min_x
+                # Dual hosts: Left host face is X<500, Right host face is X>1450.
+                # Safe center zone strictly [620, 1300] ensures >170px clearance from both faces.
+                safe_left = 620
+                safe_right = 1300
 
+            max_allowed_w = safe_right - safe_left
+            effective_pill_w = min(total_pill_w, max_allowed_w)
+
+            ideal_left = config.SUBTITLE_CENTER_X - (effective_pill_w // 2)
+            pill_left = max(safe_left, min(ideal_left, safe_right - effective_pill_w))
+            pill_right = pill_left + effective_pill_w
+
+            sx = pill_left + pill_pad
             sy = config.SUBTITLE_Y
 
             # Glow & pill background
             draw.rounded_rectangle([
-                (sx - pill_pad, sy - 15),
-                (sx + chunk["total_w"] + pill_pad, sy + config.SUBTITLE_FONT_SIZE + 25)
-            ], radius=20, fill=(12, 14, 22, 195), outline=(255, 215, 0, 130), width=1)
+                (pill_left, sy - 14),
+                (pill_right, sy + config.SUBTITLE_FONT_SIZE + 22)
+            ], radius=20, fill=(12, 14, 22, 215), outline=(255, 215, 0, 180), width=2)
 
             curr_x = sx
             for wm in chunk["words"]:
