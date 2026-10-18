@@ -26,6 +26,15 @@ const PODCAST_HISTORY = [
     "duration_min": 23.64,
     "video_file": "podcast_ep3_20261017_172354.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 4,
+    "topic": "The Architecture of Argument: Constructing Persuasive Reasoning in Complex Debates",
+    "date": "2026-10-18T17:40:54.462799",
+    "duration_sec": 1438.63,
+    "duration_min": 23.98,
+    "video_file": "podcast_ep4_20261018_172807.mp4",
+    "platform": "Facebook"
   }
 ];
 if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }
