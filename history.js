@@ -35,6 +35,15 @@ const PODCAST_HISTORY = [
     "duration_min": 23.98,
     "video_file": "podcast_ep4_20261018_172807.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 5,
+    "topic": "The Unseen Architecture of Habit: Rewiring Your Brain for Lasting Change",
+    "date": "2026-10-19T20:22:09.006293",
+    "duration_sec": 1337.86,
+    "duration_min": 22.3,
+    "video_file": "podcast_ep5_20261019_200233.mp4",
+    "platform": "Facebook"
   }
 ];
 if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }
