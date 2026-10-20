@@ -43,5 +43,14 @@
     "duration_min": 22.3,
     "video_file": "podcast_ep5_20261019_200233.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 6,
+    "topic": "The Language of Learning: How We Acquire Knowledge and Wisdom",
+    "date": "2026-10-20T18:55:45.955743",
+    "duration_sec": 1421.78,
+    "duration_min": 23.7,
+    "video_file": "podcast_ep6_20261020_183513.mp4",
+    "platform": "Facebook"
   }
 ]
