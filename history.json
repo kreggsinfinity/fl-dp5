@@ -52,5 +52,14 @@
     "duration_min": 23.7,
     "video_file": "podcast_ep6_20261020_183513.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 7,
+    "topic": "The Nuances of 'Why': Unpacking Motivation and Intent in Language",
+    "date": "2026-10-21T19:10:33.028614",
+    "duration_sec": 1457.83,
+    "duration_min": 24.3,
+    "video_file": "podcast_ep7_20261021_184820.mp4",
+    "platform": "Facebook"
   }
 ]
