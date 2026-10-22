@@ -62,6 +62,15 @@ const PODCAST_HISTORY = [
     "duration_min": 24.3,
     "video_file": "podcast_ep7_20261021_184820.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 8,
+    "topic": "The Subtle Art of Intellectual Humility: Embracing Uncertainty for Deeper Understanding",
+    "date": "2026-10-22T18:54:00.533093",
+    "duration_sec": 1378.06,
+    "duration_min": 22.97,
+    "video_file": "podcast_ep8_20261022_184113.mp4",
+    "platform": "Facebook"
   }
 ];
 if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }
