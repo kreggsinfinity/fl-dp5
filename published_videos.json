@@ -70,5 +70,14 @@
     "duration_min": 22.97,
     "video_file": "podcast_ep8_20261022_184113.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 9,
+    "topic": "The Lexicon of Empathy: Decoding Emotional Language for Deeper Human Connection",
+    "date": "2026-10-23T18:55:36.692496",
+    "duration_sec": 1475.35,
+    "duration_min": 24.59,
+    "video_file": "podcast_ep9_20261023_183346.mp4",
+    "platform": "Facebook"
   }
 ]
