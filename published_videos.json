@@ -79,5 +79,14 @@
     "duration_min": 24.59,
     "video_file": "podcast_ep9_20261023_183346.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 10,
+    "topic": "The Architecture of Understanding: Deconstructing Complex Ideas and Communicating Them Clearly",
+    "date": "2026-10-24T17:58:52.519677",
+    "duration_sec": 1448.04,
+    "duration_min": 24.13,
+    "video_file": "podcast_ep10_20261024_173126.mp4",
+    "platform": "Facebook"
   }
 ]
