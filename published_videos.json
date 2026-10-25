@@ -88,5 +88,14 @@
     "duration_min": 24.13,
     "video_file": "podcast_ep10_20261024_173126.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 11,
+    "topic": "The Paradox of Choice: Navigating Decision Paralysis with Cognitive Agility",
+    "date": "2026-10-25T18:07:32.283663",
+    "duration_sec": 1434.89,
+    "duration_min": 23.91,
+    "video_file": "podcast_ep11_20261025_174357.mp4",
+    "platform": "Facebook"
   }
 ]
