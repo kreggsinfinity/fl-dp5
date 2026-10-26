@@ -98,6 +98,15 @@ const PODCAST_HISTORY = [
     "duration_min": 23.91,
     "video_file": "podcast_ep11_20261025_174357.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 12,
+    "topic": "The Eloquence of Silence: Mastering the Power of Pause in Communication",
+    "date": "2026-10-26T20:22:08.962210",
+    "duration_sec": 1394.09,
+    "duration_min": 23.23,
+    "video_file": "podcast_ep12_20261026_200225.mp4",
+    "platform": "Facebook"
   }
 ];
 if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }
