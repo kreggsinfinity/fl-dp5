@@ -107,6 +107,15 @@ const PODCAST_HISTORY = [
     "duration_min": 23.23,
     "video_file": "podcast_ep12_20261026_200225.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 13,
+    "topic": "The Spectrum of Certainty: Articulating Beliefs and Navigating Doubt in English",
+    "date": "2026-10-27T20:01:41.623755",
+    "duration_sec": 1526.88,
+    "duration_min": 25.45,
+    "video_file": "podcast_ep13_20261027_193155.mp4",
+    "platform": "Facebook"
   }
 ];
 if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }
