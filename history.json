@@ -115,5 +115,14 @@
     "duration_min": 25.45,
     "video_file": "podcast_ep13_20261027_193155.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 14,
+    "topic": "The Art of Nuance: Mastering Subtlety in English Expression",
+    "date": "2026-10-28T20:06:48.608284",
+    "duration_sec": 1381.8,
+    "duration_min": 23.03,
+    "video_file": "podcast_ep14_20261028_194241.mp4",
+    "platform": "Facebook"
   }
 ]
