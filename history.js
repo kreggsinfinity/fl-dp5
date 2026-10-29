@@ -125,6 +125,15 @@ const PODCAST_HISTORY = [
     "duration_min": 23.03,
     "video_file": "podcast_ep14_20261028_194241.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 15,
+    "topic": "Beyond the Surface: Mastering Linguistic Precision for Deeper Meaning",
+    "date": "2026-10-29T20:06:25.693262",
+    "duration_sec": 1436.93,
+    "duration_min": 23.95,
+    "video_file": "podcast_ep15_20261029_194439.mp4",
+    "platform": "Facebook"
   }
 ];
 if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }
