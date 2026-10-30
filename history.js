@@ -134,6 +134,15 @@ const PODCAST_HISTORY = [
     "duration_min": 23.95,
     "video_file": "podcast_ep15_20261029_194439.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 16,
+    "topic": "The Art of Framing: How Word Choice Shapes Reality and Reasoning",
+    "date": "2026-10-30T19:53:45.469323",
+    "duration_sec": 1404.21,
+    "duration_min": 23.4,
+    "video_file": "podcast_ep16_20261030_193356.mp4",
+    "platform": "Facebook"
   }
 ];
 if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }
