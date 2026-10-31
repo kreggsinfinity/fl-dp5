@@ -142,5 +142,14 @@
     "duration_min": 23.4,
     "video_file": "podcast_ep16_20261030_193356.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 17,
+    "topic": "The Semantic Dance: Mastering the Art of Precise Language for Persuasive Discourse",
+    "date": "2026-10-31T19:01:43.779555",
+    "duration_sec": 1491.05,
+    "duration_min": 24.85,
+    "video_file": "podcast_ep17_20261031_184025.mp4",
+    "platform": "Facebook"
   }
 ]
