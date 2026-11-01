@@ -151,5 +151,14 @@
     "duration_min": 24.85,
     "video_file": "podcast_ep17_20261031_184025.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 18,
+    "topic": "The Psychology of 'Saying No': Mastering Assertiveness and Boundary Setting in English",
+    "date": "2026-11-01T19:22:27.731909",
+    "duration_sec": 1480.03,
+    "duration_min": 24.67,
+    "video_file": "podcast_ep18_20261101_190147.mp4",
+    "platform": "Facebook"
   }
 ]
