@@ -161,6 +161,15 @@ const PODCAST_HISTORY = [
     "duration_min": 24.67,
     "video_file": "podcast_ep18_20261101_190147.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 19,
+    "topic": "The Subtle Art of Constructive Disagreement: Articulating Dissent with Grace and Impact",
+    "date": "2026-11-02T23:10:04.126346",
+    "duration_sec": 1357.92,
+    "duration_min": 22.63,
+    "video_file": "podcast_ep19_20261102_225025.mp4",
+    "platform": "Facebook"
   }
 ];
 if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }
