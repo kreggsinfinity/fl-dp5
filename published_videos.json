@@ -169,5 +169,14 @@
     "duration_min": 22.63,
     "video_file": "podcast_ep19_20261102_225025.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 20,
+    "topic": "The Architecture of Interpretation: Deconstructing Meaning Beyond the Literal",
+    "date": "2026-11-03T20:54:50.934694",
+    "duration_sec": 1401.0,
+    "duration_min": 23.35,
+    "video_file": "podcast_ep20_20261103_203404.mp4",
+    "platform": "Facebook"
   }
 ]
