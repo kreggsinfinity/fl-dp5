@@ -178,5 +178,14 @@
     "duration_min": 23.35,
     "video_file": "podcast_ep20_20261103_203404.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 21,
+    "topic": "The Metaphorical Mind: Unlocking Deeper Meaning with Figurative Language",
+    "date": "2026-11-04T21:14:34.411857",
+    "duration_sec": 1368.69,
+    "duration_min": 22.81,
+    "video_file": "podcast_ep21_20261104_205259.mp4",
+    "platform": "Facebook"
   }
 ]
