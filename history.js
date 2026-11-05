@@ -188,6 +188,15 @@ const PODCAST_HISTORY = [
     "duration_min": 22.81,
     "video_file": "podcast_ep21_20261104_205259.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 22,
+    "topic": "The Sculptor's Tongue: Crafting Precise Arguments with Verbs and Adjectives",
+    "date": "2026-11-05T21:30:34.092595",
+    "duration_sec": 1391.11,
+    "duration_min": 23.19,
+    "video_file": "podcast_ep22_20261105_211016.mp4",
+    "platform": "Facebook"
   }
 ];
 if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }
