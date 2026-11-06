@@ -196,5 +196,14 @@
     "duration_min": 23.19,
     "video_file": "podcast_ep22_20261105_211016.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 23,
+    "topic": "The Art of Intellectual Curiosity: Fueling Deeper Learning Through Questioning",
+    "date": "2026-11-06T20:48:11.505435",
+    "duration_sec": 1444.7,
+    "duration_min": 24.08,
+    "video_file": "podcast_ep23_20261106_202943.mp4",
+    "platform": "Facebook"
   }
 ]
