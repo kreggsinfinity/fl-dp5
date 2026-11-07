@@ -206,6 +206,15 @@ const PODCAST_HISTORY = [
     "duration_min": 24.08,
     "video_file": "podcast_ep23_20261106_202943.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 24,
+    "topic": "The Eloquent Architect: Building Compelling Narratives with Precise Sentence Structures",
+    "date": "2026-11-07T19:16:44.936503",
+    "duration_sec": 1422.31,
+    "duration_min": 23.71,
+    "video_file": "podcast_ep24_20261107_185729.mp4",
+    "platform": "Facebook"
   }
 ];
 if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }
