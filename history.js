@@ -215,6 +215,15 @@ const PODCAST_HISTORY = [
     "duration_min": 23.71,
     "video_file": "podcast_ep24_20261107_185729.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 25,
+    "topic": "The Cognitive Architect: Building Bridges of Understanding with Precise Language",
+    "date": "2026-11-08T19:11:53.142674",
+    "duration_sec": 1335.6,
+    "duration_min": 22.26,
+    "video_file": "podcast_ep25_20261108_185633.mp4",
+    "platform": "Facebook"
   }
 ];
 if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }
