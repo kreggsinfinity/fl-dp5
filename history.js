@@ -233,6 +233,15 @@ const PODCAST_HISTORY = [
     "duration_min": 24.82,
     "video_file": "podcast_ep26_20261109_233013.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 27,
+    "topic": "The Alchemy of Analogies: Transforming Abstract Ideas into Vivid Understanding",
+    "date": "2026-11-10T21:09:21.538771",
+    "duration_sec": 1359.86,
+    "duration_min": 22.66,
+    "video_file": "podcast_ep27_20261110_205619.mp4",
+    "platform": "Facebook"
   }
 ];
 if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }
