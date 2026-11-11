@@ -242,6 +242,15 @@ const PODCAST_HISTORY = [
     "duration_min": 22.66,
     "video_file": "podcast_ep27_20261110_205619.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 28,
+    "topic": "The Unseen Architecture of Persuasion: Subtle Language Techniques for Impactful Communication",
+    "date": "2026-11-11T21:46:17.850478",
+    "duration_sec": 1412.81,
+    "duration_min": 23.55,
+    "video_file": "podcast_ep28_20261111_212906.mp4",
+    "platform": "Facebook"
   }
 ];
 if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }
