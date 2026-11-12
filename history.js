@@ -251,6 +251,15 @@ const PODCAST_HISTORY = [
     "duration_min": 23.55,
     "video_file": "podcast_ep28_20261111_212906.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 29,
+    "topic": "The Art of the Implied: Mastering Subtext and Unspoken Meaning in English",
+    "date": "2026-11-12T21:45:18.957000",
+    "duration_sec": 1354.97,
+    "duration_min": 22.58,
+    "video_file": "podcast_ep29_20261112_213158.mp4",
+    "platform": "Facebook"
   }
 ];
 if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }
