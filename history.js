@@ -260,6 +260,15 @@ const PODCAST_HISTORY = [
     "duration_min": 22.58,
     "video_file": "podcast_ep29_20261112_213158.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 30,
+    "topic": "The Lexicon of Influence: Mastering Persuasive Diction Beyond Rhetoric",
+    "date": "2026-11-13T21:12:44.477548",
+    "duration_sec": 1360.46,
+    "duration_min": 22.67,
+    "video_file": "podcast_ep30_20261113_205643.mp4",
+    "platform": "Facebook"
   }
 ];
 if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }
