@@ -278,6 +278,15 @@ const PODCAST_HISTORY = [
     "duration_min": 24.21,
     "video_file": "podcast_ep31_20261114_192038.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 32,
+    "topic": "The Architecture of Insight: Deconstructing 'Aha!' Moments and Cultivating Epiphanies",
+    "date": "2026-11-15T20:08:36.864954",
+    "duration_sec": 1373.66,
+    "duration_min": 22.89,
+    "video_file": "podcast_ep32_20261115_195317.mp4",
+    "platform": "Facebook"
   }
 ];
 if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }
