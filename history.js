@@ -287,6 +287,15 @@ const PODCAST_HISTORY = [
     "duration_min": 22.89,
     "video_file": "podcast_ep32_20261115_195317.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 33,
+    "topic": "The Cognitive Cartographer: Mapping Complex Ideas with Precision Language",
+    "date": "2026-11-16T23:44:16.823645",
+    "duration_sec": 1335.58,
+    "duration_min": 22.26,
+    "video_file": "podcast_ep33_20261116_232804.mp4",
+    "platform": "Facebook"
   }
 ];
 if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }
