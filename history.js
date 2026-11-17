@@ -296,6 +296,15 @@ const PODCAST_HISTORY = [
     "duration_min": 22.26,
     "video_file": "podcast_ep33_20261116_232804.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 34,
+    "topic": "The Architecture of Anticipation: Mastering the Art of Foreshadowing in Thought and Speech",
+    "date": "2026-11-17T22:51:26.131050",
+    "duration_sec": 1369.49,
+    "duration_min": 22.82,
+    "video_file": "podcast_ep34_20261117_223125.mp4",
+    "platform": "Facebook"
   }
 ];
 if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }
