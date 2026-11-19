@@ -314,6 +314,15 @@ const PODCAST_HISTORY = [
     "duration_min": 22.65,
     "video_file": "podcast_ep35_20261118_223303.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 36,
+    "topic": "The Rhetoric of Resilience: How Language Shapes Our Ability to Bounce Back",
+    "date": "2026-11-19T22:42:04.378485",
+    "duration_sec": 1450.94,
+    "duration_min": 24.18,
+    "video_file": "podcast_ep36_20261119_222058.mp4",
+    "platform": "Facebook"
   }
 ];
 if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }
