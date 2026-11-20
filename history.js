@@ -323,6 +323,15 @@ const PODCAST_HISTORY = [
     "duration_min": 24.18,
     "video_file": "podcast_ep36_20261119_222058.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 37,
+    "topic": "The Cognitive Compass: Navigating Moral Dilemmas with Precise Language",
+    "date": "2026-11-20T22:10:55.657322",
+    "duration_sec": 1399.78,
+    "duration_min": 23.33,
+    "video_file": "podcast_ep37_20261120_215443.mp4",
+    "platform": "Facebook"
   }
 ];
 if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }
