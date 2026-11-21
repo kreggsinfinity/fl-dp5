@@ -332,6 +332,15 @@ const PODCAST_HISTORY = [
     "duration_min": 23.33,
     "video_file": "podcast_ep37_20261120_215443.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 38,
+    "topic": "The Labyrinth of Logic: Navigating Fallacies and Crafting Sound Reasoning",
+    "date": "2026-11-21T20:58:59.240197",
+    "duration_sec": 1494.91,
+    "duration_min": 24.92,
+    "video_file": "podcast_ep38_20261121_203711.mp4",
+    "platform": "Facebook"
   }
 ];
 if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }
