@@ -341,6 +341,15 @@ const PODCAST_HISTORY = [
     "duration_min": 24.92,
     "video_file": "podcast_ep38_20261121_203711.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 39,
+    "topic": "The Symphony of Subtext: Conducting Meaning Beyond the Words",
+    "date": "2026-11-22T21:04:26.619607",
+    "duration_sec": 1409.76,
+    "duration_min": 23.5,
+    "video_file": "podcast_ep39_20261122_204649.mp4",
+    "platform": "Facebook"
   }
 ];
 if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }
