@@ -358,5 +358,14 @@
     "duration_min": 23.29,
     "video_file": "podcast_ep40_20261124_014625.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 41,
+    "topic": "The Architecture of Empathy: Building Bridges of Understanding Through Linguistic Resonance",
+    "date": "2026-11-24T23:53:17.684887",
+    "duration_sec": 1416.38,
+    "duration_min": 23.61,
+    "video_file": "podcast_ep41_20261124_233436.mp4",
+    "platform": "Facebook"
   }
 ]
