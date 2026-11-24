@@ -350,6 +350,15 @@ const PODCAST_HISTORY = [
     "duration_min": 23.5,
     "video_file": "podcast_ep39_20261122_204649.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 40,
+    "topic": "The Art of Constructive Doubt: Cultivating Critical Thinking Through Questioning Beliefs",
+    "date": "2026-11-24T02:02:18.840001",
+    "duration_sec": 1397.54,
+    "duration_min": 23.29,
+    "video_file": "podcast_ep40_20261124_014625.mp4",
+    "platform": "Facebook"
   }
 ];
 if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }
