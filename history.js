@@ -368,6 +368,15 @@ const PODCAST_HISTORY = [
     "duration_min": 23.61,
     "video_file": "podcast_ep41_20261124_233436.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 42,
+    "topic": "The Cognitive Sculptor: Shaping Ideas with Precise Verbs and Vivid Adjectives",
+    "date": "2026-11-25T23:33:10.882154",
+    "duration_sec": 1463.33,
+    "duration_min": 24.39,
+    "video_file": "podcast_ep42_20261125_231200.mp4",
+    "platform": "Facebook"
   }
 ];
 if (typeof module !== 'undefined' && module.exports) { module.exports = PODCAST_HISTORY; }
