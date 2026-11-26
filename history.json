@@ -376,5 +376,14 @@
     "duration_min": 24.39,
     "video_file": "podcast_ep42_20261125_231200.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 43,
+    "topic": "The Cognitive Canvas: Painting Vivid Ideas with Figurative Language",
+    "date": "2026-11-26T23:28:27.595753",
+    "duration_sec": 1353.69,
+    "duration_min": 22.56,
+    "video_file": "podcast_ep43_20261126_230839.mp4",
+    "platform": "Facebook"
   }
 ]
