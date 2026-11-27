@@ -385,5 +385,14 @@
     "duration_min": 22.56,
     "video_file": "podcast_ep43_20261126_230839.mp4",
     "platform": "Facebook"
+  },
+  {
+    "episode": 44,
+    "topic": "The Art of Intellectual Humility: Embracing Uncertainty in Language",
+    "date": "2026-11-27T23:05:20.899622",
+    "duration_sec": 1411.75,
+    "duration_min": 23.53,
+    "video_file": "podcast_ep44_20261127_224933.mp4",
+    "platform": "None"
   }
 ]
